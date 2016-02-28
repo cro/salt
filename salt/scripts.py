@@ -49,6 +49,15 @@ def salt_master():
     master.start()
 
 
+def salt_glass():
+    '''
+    Start the pane of glass
+    '''
+    import salt.cli.glass
+    pane = salt.cli.glass.Pane()
+    pane.start()
+
+
 def minion_process():
     '''
     Start a minion process
