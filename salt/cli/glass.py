@@ -76,6 +76,7 @@ def format_event(evt):
 
 def key_worker(opts, fd):
     wheel = salt.wheel.WheelClient(opts)
+    wheel.print_func = None
     keys = wheel.cmd('key.list_all')
     formatted_keys = format_keys(keys)
     pickled_keys = pickle.dumps(formatted_keys)
@@ -204,8 +205,6 @@ class Pane(parsers.SaltCMDOptionParser):
                 pos = pos + 1
 
         def update_status(pipe_data):
-            import pydevd
-            pydevd.settrace('172.16.207.1', port=65500, stdoutToServer=True, stderrToServer=True)
             ret_from_pipe = pickle.loads(pipe_data)
             self.work_area_lw.insert(0, ret_from_pipe)
 
