@@ -68,9 +68,9 @@ def format_jobs(jobs):
 
 def format_event(evt):
     return urwid.AttrMap(urwid.SelectableIcon(
-        '%s: %s (%s)'.format(ret['data']['id'],
-                             ret['data']['return'],
-                             ret['data']['success'])),
+        '%s: %s (%s)'.format(evt['data']['id'],
+                             evt['data']['return'],
+                             evt['data']['success'])),
         focus_map='focus')
 
 
@@ -78,16 +78,14 @@ def key_worker(opts, fd):
     wheel = salt.wheel.WheelClient(opts)
     wheel.print_func = None
     keys = wheel.cmd('key.list_all')
-    formatted_keys = format_keys(keys)
-    pickled_keys = pickle.dumps(formatted_keys)
+    pickled_keys = pickle.dumps(keys)
     os.write(fd, pickled_keys)
 
 
 def job_worker(opts, fd):
     runner = salt.runner.RunnerClient(opts)
     jobs = runner.cmd('jobs.list_jobs')
-    formatted_jobs = format_jobs(jobs)
-    pickled_jobs = pickle.dumps(formatted_jobs)
+    pickled_jobs = pickle.dumps(jobs)
     os.write(fd, pickled_jobs)
 
 
@@ -104,12 +102,14 @@ def event_worker(opts, fd):
     )
     while True:
         ret = event.get_event(full=True)
-        if ret is None or not ret['tag'].startswith('salt/job'):
+        if ret is None:
             continue
-        if ret['data']['fun'] == 'saltutil.find_job':
-            continue
+        # if ret is None or not ret['tag'].startswith('salt/job'):
+        #     continue
+        # if ret['data']['fun'] == 'saltutil.find_job':
+        #     continue
 
-        pickled_ret = pickle.dumps(format_event(ret))
+        pickled_ret = pickle.dumps(ret)
         os.write(fd, pickled_ret)
 
 
@@ -189,7 +189,7 @@ class Pane(parsers.SaltCMDOptionParser):
     def start(self):
 
         def update_keys(pipe_data):
-            keys_from_pipe = pickle.loads(pipe_data)
+            keys_from_pipe = format_keys(pickle.loads(pipe_data))
             pos = 0
             for key in keys_from_pipe:
                 self.key_lw.insert(pos, key)
@@ -198,14 +198,15 @@ class Pane(parsers.SaltCMDOptionParser):
 
         def update_jobs(pipe_data):
             jobs_from_pipe = pickle.loads(pipe_data)
+            formatted_jobs = format_jobs(jobs_from_pipe)
             pos = 0
-            for key in jobs_from_pipe:
+            for key in formatted_jobs:
                 self.job_lw.insert(pos, key)
                 self.job_lb.focus_position = pos
                 pos = pos + 1
 
         def update_status(pipe_data):
-            ret_from_pipe = pickle.loads(pipe_data)
+            ret_from_pipe = format_event(pickle.loads(pipe_data))
             self.work_area_lw.insert(0, ret_from_pipe)
 
         self.top.focus_position = 'body'
