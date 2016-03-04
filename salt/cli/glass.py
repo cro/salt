@@ -42,15 +42,28 @@ import tornado.ioloop
 
 # When all jobs are done, set alarm to restart thread
 
+class FocusableIcon(urwid.SelectableIcon):
 
-def format_keys(keys):
+    def __init__(self, text, cursor_position=1, uid=None, callback=None):
+        self.callback = callback
+        self.uid = uid
+        return super(FocusableIcon, self).__init__(text, cursor_position)
+
+    def render(self, size, focus=False):
+        if focus:
+            if self.callback is not None:
+                self.callback(self.uid)
+        return super(FocusableIcon, self).render(size, focus)
+
+
+def format_keys(keys, callback):
     listitems = []
     for k, v in keys.iteritems():
         if k == 'local':
             continue
         for minion in v:
             listitems.append(
-                urwid.AttrMap(urwid.SelectableIcon(minion),
+                urwid.AttrMap(FocusableIcon(minion, uid=minion, callback=callback),
                               attr_map=k,
                               focus_map='focus'))
     return listitems
@@ -68,10 +81,11 @@ def format_jobs(jobs):
 
 def format_event(evt):
     return urwid.AttrMap(urwid.SelectableIcon(
-        '%s: %s (%s)'.format(evt['data']['id'],
-                             evt['data']['return'],
-                             evt['data']['success'])),
-        focus_map='focus')
+        evt), attr_map='events', focus_map='focus')
+        # '%s: %s (%s)'.format(evt['data']['id'],
+        #                      evt['data']['return'],
+        #                      evt['data']['success'])),
+        # focus_map='focus')
 
 
 def key_worker(opts, fd):
@@ -94,7 +108,7 @@ def event_worker(opts, fd):
     Attach to the pub socket and grab messages
     '''
     event = salt.utils.event.get_event(
-        None,
+        'master',
         sock_dir=opts['sock_dir'],
         transport=opts['transport'],
         opts=opts,
@@ -104,12 +118,13 @@ def event_worker(opts, fd):
         ret = event.get_event(full=True)
         if ret is None:
             continue
+        tg = ret['tag']
         # if ret is None or not ret['tag'].startswith('salt/job'):
         #     continue
         # if ret['data']['fun'] == 'saltutil.find_job':
         #     continue
 
-        pickled_ret = pickle.dumps(ret)
+        pickled_ret = pickle.dumps(tg)
         os.write(fd, pickled_ret)
 
 
@@ -122,13 +137,6 @@ class Pane(parsers.SaltCMDOptionParser):
         def input_filter(keys):
             if 'f12' in keys:
                 raise urwid.ExitMainLoop
-            if ' ' in keys:
-                self.work_area_lw.append(urwid.Text(str(top.body.focus)))
-                self.work_area_lb.focus_position = len(self.work_area_lw) - 1
-
-            if 'x' in keys:
-                self.work_area_lw.append(urwid.Text(keys))
-                self.work_area_lb.focus_position = len(self.work_area_lw) - 1
 
         self.key_lw = urwid.SimpleFocusListWalker([])
         self.key_lb = urwid.ListBox(self.key_lw)
@@ -153,17 +161,18 @@ class Pane(parsers.SaltCMDOptionParser):
                  self.wd_command_line]
             )
         )
-        self.evl = urwid.TornadoEventLoop(tornado.ioloop.IOLoop())
+#        self.evl = urwid.TornadoEventLoop(tornado.ioloop.IOLoop())
         self.loop = urwid.MainLoop(self.top, [
-            ('header', 'black', 'dark cyan', 'standout'),
+            ('header', 'light cyan, standout', 'black'),
             ('key', 'yellow', 'dark blue', 'bold'),
             ('listbox', 'light gray', 'black' ),
+            ('events', 'light cyan', 'black'),
             ('minions', 'light green', 'black'),
             ('minions_denied', 'dark red', 'black'),
             ('minions_pre', 'dark blue', 'black'),
             ('minions_rejected', 'light red', 'black'),
             ('focus', 'standout', '', '', '', '')
-        ], unhandled_input=input_filter, event_loop=self.evl)
+        ], unhandled_input=input_filter)
 
 
     def minion_key_column(self):
@@ -183,31 +192,46 @@ class Pane(parsers.SaltCMDOptionParser):
         return urwid.Pile([command_header, command_list])
 
     def work_area(self):
-        work_area_header = ('pack',urwid.Text('salt-glass'))
+        work_area_header = ('pack',urwid.AttrMap(urwid.Text('salt-glass'),
+                                                 attr_map='header'))
         return urwid.Pile([work_area_header, ('weight', 1, self.work_area_lb)])
 
     def start(self):
 
+        def update_detail(id):
+            self.command_line_lw.append(urwid.Text(id))
+
         def update_keys(pipe_data):
-            keys_from_pipe = format_keys(pickle.loads(pipe_data))
-            pos = 0
-            for key in keys_from_pipe:
-                self.key_lw.insert(pos, key)
-                self.key_lb.focus_position = pos
-                pos = pos + 1
+            try:
+                keys_from_pipe = format_keys(pickle.loads(pipe_data), update_detail)
+                pos = 0
+                for key in keys_from_pipe:
+                    self.key_lw.insert(pos, key)
+                    self.key_lb.focus_position = pos
+                    pos = pos + 1
+            except (EOFError, IndexError):
+                pass
 
         def update_jobs(pipe_data):
-            jobs_from_pipe = pickle.loads(pipe_data)
-            formatted_jobs = format_jobs(jobs_from_pipe)
-            pos = 0
-            for key in formatted_jobs:
-                self.job_lw.insert(pos, key)
-                self.job_lb.focus_position = pos
-                pos = pos + 1
+            try:
+                jobs_from_pipe = pickle.loads(pipe_data)
+                formatted_jobs = format_jobs(jobs_from_pipe)
+                pos = 0
+                for key in formatted_jobs:
+                    self.job_lw.insert(pos, key)
+                    self.job_lb.focus_position = pos
+                    pos = pos + 1
+            except (EOFError, IndexError):
+                pass
+
 
         def update_status(pipe_data):
-            ret_from_pipe = format_event(pickle.loads(pipe_data))
-            self.work_area_lw.insert(0, ret_from_pipe)
+            try:
+                ret_from_pipe = pickle.loads(pipe_data)
+                urwid_item = format_event(ret_from_pipe)
+                self.work_area_lw.insert(0, urwid_item)
+            except (EOFError, IndexError):
+                pass
 
         self.top.focus_position = 'body'
 
