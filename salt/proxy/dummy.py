@@ -35,7 +35,7 @@ def __virtual__():
 
 
 def _save_state(details):
-    pck = open(FILENAME, 'wb')  # pylint: disable=W8470
+    pck = open(FILENAME, 'wb')
     pickle.dump(details, pck)
     pck.close()
 
