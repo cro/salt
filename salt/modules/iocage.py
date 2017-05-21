@@ -5,10 +5,10 @@ Support for iocage (jails tools on FreeBSD)
 from __future__ import absolute_import
 
 # Import python libs
-# import os
-
 import logging
 import os
+import os.path
+import shutil
 # Import salt libs
 import salt.utils
 from salt.exceptions import CommandExecutionError, SaltInvocationError
@@ -34,10 +34,10 @@ def _format_ret(return_dict):
     retcode == 0 but stderr shows something wrong, etc.
     '''
     msg = ''
-    if 'stderr' in return_dict and len(return_dict['stderr']) > 0:
-        msg = msg + '{0} '.format(return_dict['stderr'])
-
     if 'stdout' in return_dict and len(return_dict['stdout']) > 0:
+        msg = msg + '{0} '.format(return_dict['stdout'])
+
+    if 'stderr' in return_dict and len(return_dict['stderr']) > 0:
         msg = msg + '{0} '.format(return_dict['stderr'])
 
     if 'retcode' in return_dict:
@@ -357,7 +357,7 @@ def get_property(property_name, jail_name, **kwargs):
         return _list_properties(jail_name)['properties'][property_name]
 
 
-def set_property(jail_name, **kwargs):
+def set_property(jail_name, **kws):
     '''
     Set property value for a given jail
 
@@ -367,13 +367,18 @@ def set_property(jail_name, **kwargs):
 
         salt '*' iocage.set_property <jail_name> [<property=value>]
     '''
+    kw = {}
+    for k in kws:
+        if not k.startswith('__'):
+            kw[k] = kws[k]
+
     result = {}
-    for k, v in kwargs:
+    for k in kw:
         try:
-            ret = __exec('iocage set {0}={1} {2}'.format(k, v, jail_name))
+            ret = _exec('iocage set {0}={1} {2}'.format(k, kw[k], jail_name))
             result[k] = True
         except CommandExecutionError as msg:
-            result[jail_name][k] = msg
+            result[k] = msg.strerror
 
     return {jail_name: result} 
 
@@ -478,6 +483,41 @@ def create(jail_type="full", template_id=None, **kwargs):
         return {'create':{kwargs['tag']:True}}
     else:
         return {'create':{create_ret['stdout']: True}}
+
+
+def jail_import(filename, overwrite=False, saltenv='base'):
+    '''
+    Import a jail from a filename
+    '''
+    if os.path.exists(os.path.join('/iocage/images', os.path.basename(filename))):
+        if overwrite:
+            os.unlink(os.path.join('/iocage/images', os.path.basename(filename)))
+        else:
+            return {'success': False, 'error': 'Image {0} already exists in filesystem.'.format(os.path.basename(filename))}
+    if filename.startswith('salt://'):
+        jailfilename = __salt__['cp.cache_file'](filename)
+    else:
+        jailfilename = filename
+
+    try:
+        shutil.move(jailfilename, '/iocage/images')
+    except shutil.Error as err:
+        return err.message
+    imagefilename = os.path.join('/iocage/images', os.path.basename(jailfilename))
+    imagename = os.path.splitext(os.path.basename(jailfilename))[0]
+
+    if os.path.exists(imagefilename):
+        cmd = 'iocage import {0}'.format(imagename)
+    else:
+        ret = '{0} does not exist.'.format(imagename)
+
+    ret = _exec(cmd)
+
+#    for l in ret['stdout'].splitlines():
+#        if l.startswith('Imported'):
+
+
+    return ret
 
 
 def start(jail_name, **kwargs):
@@ -586,7 +626,8 @@ def export(jail_name, suspend=True):
 
     for l in ret['stdout'].splitlines():
         if l.startswith('Exported: '):
-            return {'export':zipfilename}
+            return {'export': zipfilename}
+
 
 def transfer(zipfile):
     '''

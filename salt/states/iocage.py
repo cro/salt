@@ -4,6 +4,7 @@ Support for iocage (jails tools on FreeBSD)
 '''
 from __future__ import absolute_import
 import logging
+from salt.exceptions import CommandExecutionError, SaltInvocationError
 log = logging.getLogger(__name__)
 
 def _property(name, value, jail, **kwargs):
@@ -48,8 +49,7 @@ def property(name, value, jail, **kwargs):
     return _property(name, value, jail, **kwargs)
 
 
-def managed(name, properties=None, jail_type="full", source=None, template_id=None, **kwargs):
-    import pudb; pu.db
+def managed(name, properties=None, jail_type="full", source=None, saltenv='base', template_id=None, **kwargs):
     ret = {'name': name,
            'changes': {},
            'comment': '',
@@ -91,15 +91,19 @@ def managed(name, properties=None, jail_type="full", source=None, template_id=No
             # set new value for each property
             try:
                 changes = {}
-                new_value = {}
+                new_values = {}
                 for prop_name, prop_value in properties.items():
-                    if jail_properties.get(prop_name, False) == prop_value:
+                    if prop_name not in jail_properties:
+                        ret['comment'] = 'No jail property called \'{0}\''.format(prop_name)
+                        ret['result'] = False
+                        return ret
+                    if jail_properties[prop_name] != prop_value:
                         changes[prop_name] = {'new': prop_value,
                                               'old': jail_properties[prop_name]}
                         new_values[prop_name] = prop_value
 
-                if not __opts__['test']:
-                    property_result = __salt__['iocage.set_property'](name, new_values)
+                if not __opts__['test'] and new_values != {}:
+                    property_result = __salt__['iocage.set_property'](name, **new_values)
                 else:
                     property_result = {}
 
@@ -121,21 +125,20 @@ def managed(name, properties=None, jail_type="full", source=None, template_id=No
             # install / create the jail
             try:
                 if not __opts__['test']:
+                    if source is not None:
+                        jail_location = __salt__['cp.cache_file'](source, saltenv)
+
                     if properties is not None:
                         __salt__['iocage.create'](tag=name, jail_type=jail_type, template_id=template_id, **properties)
                     else:
                         __salt__['iocage.create'](tag=name, **kwargs)
+                else:
+                    ret['result'] = None
             except (CommandExecutionError, SaltInvocationError) as e:
                 log.debug('####### FAIL INSTALLING NEW JAIL')
                 log.debug(e)
                 ret['result'] = False
                 ret['comment'] = 'Creating new jail {0} failed with {1}'.format(name, e)
-            else:
-                if __opts__['test']:
-                    ret['result'] = None
-                else:
-                    ret['result'] = True
-                ret['comment'] = 'New jail %s installed' % (name,)
 
     return ret
 
