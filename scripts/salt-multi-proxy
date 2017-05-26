@@ -3,7 +3,7 @@
 This script is used to kick off a salt proxy minion daemon
 '''
 
-from salt.scripts import salt_proxy_minion
+from salt.scripts import salt_multi_proxy
 from salt.utils import is_windows
 from multiprocessing import freeze_support
 
@@ -23,4 +23,4 @@ if __name__ == '__main__':
     # This handles the bootstrapping code that is included with frozen
     # scripts. It is a no-op on unfrozen code.
     freeze_support()
-    salt_proxy_minion()
+    salt_multi_proxy()

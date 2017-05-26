@@ -367,8 +367,8 @@ def salt_multi_proxy():
             queue = multiprocessing.Queue()
         except Exception:
             # This breaks in containers
-            proxyminion = salt.cli.daemons.MultiProxyMinion()
-            proxyminion.start()
+            multiproxyminion = salt.cli.daemons.MultiProxyMinion()
+            multiproxyminion.start()
             return
         process = multiprocessing.Process(target=multi_proxy_minion_process, args=(queue,))
         process.start()

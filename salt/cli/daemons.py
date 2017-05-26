@@ -645,7 +645,7 @@ class MultiProxyMinion(parsers.ProxyMinionOptionParser, DaemonsMixin):  # pylint
             self.set_pidfile()
             if self.config.get('master_type') == 'func':
                 salt.minion.eval_master_func(self.config)
-            self.minion = salt.minion.ProxyMinionManager(self.config)
+            self.minion = salt.minion.MultiProxyMinionManager(self.config)
         else:
             # For proxy minions, this doesn't work yet.
             import salt.daemons.flo
