@@ -1422,6 +1422,19 @@ class Minion(MinionBase):
 
             salt.utils.daemonize_if(opts)
 
+            # Append pid to tempfile
+            while True:
+                log.debug('Appending pid to tempfile')
+                try:
+                    with salt.utils.flopen('/tmp/multiproxy_pids', 'a+') as f:
+                        f.write(str(os.getpid()))
+                        f.write('\n')
+                    break
+                except IOError as e:
+                    log.info('Waiting for lock on multiproxy_pids')
+                    time.sleep(1)
+
+
             # Reconfigure multiprocessing logging after daemonizing
             salt.log.setup.setup_multiprocessing_logging()
 
@@ -1595,6 +1608,24 @@ class Minion(MinionBase):
                         )
                     )
                     log.error(traceback.format_exc())
+
+    # Remove my pid from the tempfile
+    while True:
+        log.debug('Removing my pid from the tempfile')
+        try:
+            with salt.utils.flopen('/tmp/multiproxy_pids', 'a+') as f:
+                pids = f.readlines()
+                pid_set = set(pids)
+                f.seek(0)
+                for p in pid_set:
+                    if p.rstrip() != str(os.getpid()):
+                        if len(p.rstrip()) > 0:
+                            f.write(p)
+                f.truncate()
+            break
+        except IOError as e:
+            log.info('Waiting for lock on multiproxy_pids')
+            time.sleep(1)
 
     @classmethod
     def _thread_multi_return(cls, minion_instance, opts, data):
@@ -3721,7 +3752,9 @@ class MultiProxyMinion(Minion):
         # Pull in the utils
         self.utils = salt.loader.utils(self.opts)
 
-        self.multiproxy_ids = ['hailhydra1', 'hailhydra2', 'hailhydra3']
+        self.multiproxy_ids = ['arm1', 'arm2', 'arm3',
+                               'arm4', 'arm5', 'arm6',
+                               'arm7', 'arm8', 'arm9']
         # Then load the proxy module
         self.proxy = salt.loader.proxy(self.opts, utils=self.utils)
 
@@ -3912,6 +3945,18 @@ class MultiProxyMinion(Minion):
                 minion_instance.proc_dir = (
                     get_proc_dir(opts['cachedir'], uid=uid)
                 )
+        sleeping_dogs_lie = True
+        while sleeping_dogs_lie:
+            log.debug('Counting number of running processes')
+            with salt.utils.flopen('/tmp/multiproxy_pids', 'r+') as f:
+                pids = f.readlines()
+            if len(pids) > 3:
+                log.debug('-------------------------------')
+                log.debug('Too many processes running, waiting.')
+                log.debug('-------------------------------')
+                time.sleep(1)
+            else:
+                sleeping_dogs_lie = False
 
         with tornado.stack_context.StackContext(minion_instance.ctx):
             if isinstance(data['fun'], tuple) or isinstance(data['fun'], list):
