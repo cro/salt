@@ -1322,8 +1322,10 @@ class Minion(MinionBase):
 
             if hasattr(self, 'multiproxy') and self.multiproxy and \
                     data['fun'] == 'multiproxy.add':
-                log.debug('Adding new multiproxy target {0}'.format(data['args']))
-                self.multiproxy_ids.append(data)
+                log.debug('Adding new multiproxy target {0}'.format(data['arg']))
+                for newid in data['arg']:
+                    os.system(' '.join(['cp', '/etc/salt/pki/master/minions/arm1', '/etc/salt/pki/master/minions/{}'.format(newid)]))
+                    self.multiproxy_ids.append(newid)
 
 
 
@@ -1426,13 +1428,16 @@ class Minion(MinionBase):
             while True:
                 log.debug('Appending pid to tempfile')
                 try:
-                    with salt.utils.flopen('/tmp/multiproxy_pids', 'a+') as f:
+                    with salt.utils.files.flopen('/tmp/multiproxy_pids', 'a+') as f:
                         f.write(str(os.getpid()))
                         f.write('\n')
                     break
                 except IOError as e:
                     log.info('Waiting for lock on multiproxy_pids')
                     time.sleep(1)
+                except AttributeError:
+                    break
+                    pass
 
 
             # Reconfigure multiprocessing logging after daemonizing
@@ -1626,6 +1631,9 @@ class Minion(MinionBase):
         except IOError as e:
             log.info('Waiting for lock on multiproxy_pids')
             time.sleep(1)
+        except AttributeError:
+            break
+            pass
 
     @classmethod
     def _thread_multi_return(cls, minion_instance, opts, data):
@@ -3948,15 +3956,19 @@ class MultiProxyMinion(Minion):
         sleeping_dogs_lie = True
         while sleeping_dogs_lie:
             log.debug('Counting number of running processes')
-            with salt.utils.flopen('/tmp/multiproxy_pids', 'r+') as f:
-                pids = f.readlines()
-            if len(pids) > 3:
-                log.debug('-------------------------------')
-                log.debug('Too many processes running, waiting.')
-                log.debug('-------------------------------')
-                time.sleep(1)
-            else:
-                sleeping_dogs_lie = False
+            try:
+                with salt.utils.flopen('/tmp/multiproxy_pids', 'r+') as f:
+                    pids = f.readlines()
+                if len(pids) > 3:
+                    log.debug('-------------------------------')
+                    log.debug('Too many processes running, waiting.')
+                    log.debug('-------------------------------')
+                    time.sleep(1)
+                else:
+                    sleeping_dogs_lie = False
+            except AttributeError:
+                break
+                pass
 
         with tornado.stack_context.StackContext(minion_instance.ctx):
             if isinstance(data['fun'], tuple) or isinstance(data['fun'], list):
