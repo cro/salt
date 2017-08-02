@@ -1328,7 +1328,6 @@ class Minion(MinionBase):
                     self.multiproxy_ids.append(newid)
 
 
-
         # We stash an instance references to allow for the socket
         # communication in Windows. You can't pickle functions, and thus
         # python needs to be able to reconstruct the reference on the other
