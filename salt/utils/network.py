@@ -953,7 +953,6 @@ def _junos_interfaces_ifconfig(out):
         updown = False
         primary = False
         for line in group.splitlines():
-            print(line)
             miface = piface.match(line)
             mmac = pmac.match(line)
             mip = pip.match(line)
