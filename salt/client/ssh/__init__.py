@@ -186,13 +186,14 @@ EOF'''.format(
             EX_THIN_PYTHON_INVALID=salt.defaults.exitcodes.EX_THIN_PYTHON_INVALID,
             ).split('\n')])
 
-if not is_windows():
-    shim_file = os.path.join(os.path.dirname(__file__), 'ssh_py_shim.py')
-    if not os.path.exists(shim_file):
-        # On esky builds we only have the .pyc file
-        shim_file += 'c'
-    with salt.utils.files.fopen(shim_file) as ssh_py_shim:
-        SSH_PY_SHIM = ssh_py_shim.read()
+# if not is_windows():
+#     shim_file = os.path.join(os.path.dirname(__file__), 'ssh_py_shim.py')
+#     if not os.path.exists(shim_file):
+#         # On esky builds we only have the .pyc file
+#         shim_file += 'c'
+#     with salt.utils.files.fopen(shim_file) as ssh_py_shim:
+#         SSH_PY_SHIM = ssh_py_shim.read()
+SSH_PY_SHIM = None
 
 log = logging.getLogger(__name__)
 
