@@ -23,7 +23,7 @@ import sys
 import os.path
 
 __PLATFORM = sys.platform.lower()
-
+__PLATFORM = 'junos'
 
 try:
     # Let's try loading the system paths from the generated module at
@@ -72,8 +72,8 @@ if CONFIG_DIR is None:
         CONFIG_DIR = os.path.join(ROOT_DIR, 'usr', 'pkg', 'etc', 'salt')
     elif 'sunos5' in __PLATFORM:
         CONFIG_DIR = os.path.join(ROOT_DIR, 'opt', 'local', 'etc', 'salt')
-    else:
-        CONFIG_DIR = os.path.join(ROOT_DIR, 'etc', 'salt')
+    elif 'junos' in __PLATFORM:
+        CONFIG_DIR = os.path.join(ROOT_DIR, 'var','local','salt','etc', 'salt')
 
 SHARE_DIR = __generated_syspaths.SHARE_DIR
 if SHARE_DIR is None:
@@ -85,16 +85,24 @@ if SHARE_DIR is None:
         SHARE_DIR = os.path.join(ROOT_DIR, 'usr', 'share', 'salt')
     elif 'sunos5' in __PLATFORM:
         SHARE_DIR = os.path.join(ROOT_DIR, 'usr', 'share', 'salt')
+    elif 'junos' in __PLATFORM:
+        SHARE_DIR = os.path.join(ROOT_DIR, 'var','local','salt','share', 'salt')
     else:
         SHARE_DIR = os.path.join(ROOT_DIR, 'usr', 'share', 'salt')
 
 CACHE_DIR = __generated_syspaths.CACHE_DIR
 if CACHE_DIR is None:
-    CACHE_DIR = os.path.join(ROOT_DIR, 'var', 'cache', 'salt')
+    if 'junos' in __PLATFORM:
+        CACHE_DIR = os.path.join(ROOT_DIR, 'var','local','salt','cache', 'salt')
+    else:
+        CACHE_DIR = os.path.join(ROOT_DIR, 'var', 'cache', 'salt')
 
 SOCK_DIR = __generated_syspaths.SOCK_DIR
 if SOCK_DIR is None:
-    SOCK_DIR = os.path.join(ROOT_DIR, 'var', 'run', 'salt')
+    if 'junos' in __PLATFORM:
+        SOCK_DIR = os.path.join(ROOT_DIR, 'var','local','salt','run', 'salt')
+    else:
+        SOCK_DIR = os.path.join(ROOT_DIR, 'var', 'run', 'salt')
 
 SRV_ROOT_DIR = __generated_syspaths.SRV_ROOT_DIR
 if SRV_ROOT_DIR is None:
@@ -122,7 +130,10 @@ if LOGS_DIR is None:
 
 PIDFILE_DIR = __generated_syspaths.PIDFILE_DIR
 if PIDFILE_DIR is None:
-    PIDFILE_DIR = os.path.join(ROOT_DIR, 'var', 'run')
+    if 'junos' in __PLATFORM:
+        PIDFILE_DIR = os.path.join(ROOT_DIR, 'var','local','salt','run')
+    else:
+        PIDFILE_DIR = os.path.join(ROOT_DIR, 'var', 'run', 'salt')
 
 SPM_PARENT_PATH = __generated_syspaths.SPM_PARENT_PATH
 if SPM_PARENT_PATH is None:
