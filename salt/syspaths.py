@@ -73,7 +73,7 @@ if CONFIG_DIR is None:
     elif 'sunos5' in __PLATFORM:
         CONFIG_DIR = os.path.join(ROOT_DIR, 'opt', 'local', 'etc', 'salt')
     elif 'junos' in __PLATFORM:
-        CONFIG_DIR = os.path.join(ROOT_DIR, 'var','local','salt','etc', 'salt')
+        CONFIG_DIR = os.path.join(ROOT_DIR, 'var','local','salt','etc')
 
 SHARE_DIR = __generated_syspaths.SHARE_DIR
 if SHARE_DIR is None:
@@ -86,21 +86,21 @@ if SHARE_DIR is None:
     elif 'sunos5' in __PLATFORM:
         SHARE_DIR = os.path.join(ROOT_DIR, 'usr', 'share', 'salt')
     elif 'junos' in __PLATFORM:
-        SHARE_DIR = os.path.join(ROOT_DIR, 'var','local','salt','share', 'salt')
+        SHARE_DIR = os.path.join(ROOT_DIR, 'var','local','salt','share')
     else:
         SHARE_DIR = os.path.join(ROOT_DIR, 'usr', 'share', 'salt')
 
 CACHE_DIR = __generated_syspaths.CACHE_DIR
 if CACHE_DIR is None:
     if 'junos' in __PLATFORM:
-        CACHE_DIR = os.path.join(ROOT_DIR, 'var','local','salt','cache', 'salt')
+        CACHE_DIR = os.path.join(ROOT_DIR, 'var','local','salt','cache')
     else:
         CACHE_DIR = os.path.join(ROOT_DIR, 'var', 'cache', 'salt')
 
 SOCK_DIR = __generated_syspaths.SOCK_DIR
 if SOCK_DIR is None:
     if 'junos' in __PLATFORM:
-        SOCK_DIR = os.path.join(ROOT_DIR, 'var','local','salt','run', 'salt')
+        SOCK_DIR = os.path.join(ROOT_DIR, 'var','local','salt','run')
     else:
         SOCK_DIR = os.path.join(ROOT_DIR, 'var', 'run', 'salt')
 
