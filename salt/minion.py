@@ -446,7 +446,7 @@ class MinionBase(object):
         self.functions = salt.loader.minion_mods(self.opts, utils=self.utils)
         self.serializers = salt.loader.serializers(self.opts)
         self.returners = salt.loader.returners(self.opts, self.functions)
-        self.proxy = salt.loader.proxy(self.opts, self.functions, self.returners, None)
+        self.proxy = salt.loader.proxy(self.opts, self.functions, self.returners, self.utils)
         # TODO: remove
         self.function_errors = {}  # Keep the funcs clean
         self.states = salt.loader.states(self.opts,
@@ -2571,6 +2571,7 @@ class Minion(MinionBase):
             uid = salt.utils.user.get_uid(user=self.opts.get('user', None))
             self.proc_dir = get_proc_dir(self.opts['cachedir'], uid=uid)
             self.grains_cache = self.opts['grains']
+
             self.ready = True
 
     def setup_beacons(self, before_connect=False):
