@@ -30,9 +30,10 @@ import glob
 import hashlib
 import mmap
 try:
-    from collections.abc import Iterable, Mapping, namedtuple
+    from collections.abc import Iterable, Mapping
 except ImportError:
-    from collectionsimport Iterable, Mapping, namedtuple
+    from collections import Iterable, Mapping
+from collections import namedtuple
 from functools import reduce  # pylint: disable=redefined-builtin
 
 # pylint: disable=import-error,no-name-in-module,redefined-builtin
