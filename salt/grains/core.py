@@ -24,6 +24,7 @@ from errno import EACCES, EPERM
 import datetime
 import warnings
 import time
+import hashlib
 
 # pylint: disable=import-error
 try:
@@ -2793,12 +2794,8 @@ def get_server_id():
     if py_ver >= (3, 3):
         # Python 3.3 enabled hash randomization, so we need to shell out to get
         # a reliable hash.
-        id_hash = __salt__['cmd.run'](
-            [sys.executable, '-c', 'print(hash("{0}"))'.format(id_)],
-            env={'PYTHONHASHSEED': '0'}
-        )
         try:
-            id_hash = int(id_hash)
+            id_hash = int.from_bytes(hashlib.sha256(id_.encode()).digest())
         except (TypeError, ValueError):
             log.debug(
                 'Failed to hash the ID to get the server_id grain. Result of '
