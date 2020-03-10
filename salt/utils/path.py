@@ -304,8 +304,13 @@ def which_bin(exes):
     '''
     Scan over some possible executables and return the first one that is found
     '''
-    if not isinstance(exes, Iterable):
-        return None
+     try:
+         if not isinstance(exes, collections.abc.Iterable):
+             return None
+     except AttributeError:
+         if not isinstance(exes, collections.Iterable):
+             return None
+
     for exe in exes:
         path = which(exe)
         if not path:

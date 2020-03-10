@@ -54,8 +54,6 @@ log = logging.getLogger(__name__)
 # Define the module's virtual name
 __virtualname__ = 'junos'
 
-__proxyenabled__ = ['junos']
-
 
 def __virtual__():
     '''
@@ -63,7 +61,7 @@ def __virtual__():
     module to work.  We also need a proxymodule entry in __opts__
     in the opts dictionary
     '''
-    if HAS_JUNOS and 'proxy' in __opts__:
+    if HAS_JUNOS:
         return __virtualname__
     else:
         return (False, 'The junos module could not be loaded: '
@@ -102,8 +100,14 @@ def facts_refresh():
 
         salt 'device_name' junos.facts_refresh
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
+
     ret = {}
+
     ret['out'] = True
     try:
         conn.facts_refresh()
@@ -132,6 +136,11 @@ def facts():
 
         salt 'device_name' junos.facts
     '''
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     try:
         ret['facts'] = __proxy__['junos.get_serialized_facts']()
@@ -181,7 +190,12 @@ def rpc(cmd=None, dest=None, **kwargs):
         salt 'device' junos.rpc get-chassis-inventory
     '''
 
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
+
     ret = {}
     ret['out'] = True
 
@@ -381,7 +395,11 @@ def commit(**kwargs):
         salt 'device_name' junos.commit sync=True dev_timeout=90
     '''
 
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     op = dict()
     if '__pub_arg' in kwargs:
@@ -534,7 +552,11 @@ def diff(**kwargs):
     if kwargs:
         salt.utils.args.invalid_kwargs(kwargs)
 
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     ret['out'] = True
     try:
@@ -581,7 +603,11 @@ def ping(dest_ip=None, **kwargs):
         salt 'device_name' junos.ping '8.8.8.8' count=5
         salt 'device_name' junos.ping '8.8.8.8' ttl=1 rapid=True
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
 
     if dest_ip is None:
@@ -638,7 +664,11 @@ def cli(command=None, **kwargs):
         salt 'device_name' junos.cli 'show version' dev_timeout=40
         salt 'device_name' junos.cli 'show system alarms' format=xml dest=/home/user/cli_output.txt
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
 
     format_ = kwargs.pop('format', 'text')
     if not format_:
@@ -712,7 +742,11 @@ def shutdown(**kwargs):
         salt 'device_name' junos.shutdown shutdown=True in_min=10
         salt 'device_name' junos.shutdown shutdown=True
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     sw = SW(conn)
 
@@ -828,7 +862,11 @@ def install_config(path=None, **kwargs):
         salt 'device_name' junos.install_config 'salt://my_new_configuration.conf' dev_timeout=300 diffs_file='/salt/confs/old_config.conf' overwrite=True
         salt 'device_name' junos.install_config 'salt://syslog_template.conf' template_vars='{"syslog_host": "10.180.222.7"}'
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     ret['out'] = True
 
@@ -971,7 +1009,11 @@ def zeroize():
 
         salt 'device_name' junos.zeroize
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     ret['out'] = True
     try:
@@ -1038,7 +1080,11 @@ def install_os(path=None, **kwargs):
         salt 'device_name' junos.install_os 'salt://images/junos_image.tgz' reboot=True
         salt 'device_name' junos.install_os 'salt://junos_16_1.tgz' dev_timeout=300
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     ret['out'] = True
 
@@ -1113,7 +1159,11 @@ def file_copy(src=None, dest=None):
 
         salt 'device_name' junos.file_copy /home/m2/info.txt info_copy.txt
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     ret['out'] = True
 
@@ -1161,7 +1211,11 @@ def lock():
 
         salt 'device_name' junos.lock
     '''
-    conn = __proxy__['junos.conn']()
+    try:
+        conn = __proxy__['junos.conn']()
+    except NameError:
+        conn = __utils__['junos.conn']()
+        __proxy__ = __utils__
     ret = {}
     ret['out'] = True
     try:
