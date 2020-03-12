@@ -39,7 +39,7 @@ __FQDN__ = None
 # Extend the default list of supported distros. This will be used for the
 # /etc/DISTRO-release checking that is part of linux_distribution()
 from platform import _supported_dists
-_supported_dists += ('arch', 'mageia', 'meego', 'vmware', 'bluewhite64',
+_supported_dists += ('arch', 'junos', 'mageia', 'meego', 'vmware', 'bluewhite64',
                      'slamd64', 'ovs', 'system', 'mint', 'oracle', 'void')
 
 # linux_distribution deprecated in py3.7
@@ -1418,6 +1418,7 @@ _OS_NAME_MAP = {
     'archarm': 'Arch ARM',
     'arch': 'Arch',
     'debian': 'Debian',
+    'junos': 'Junos',
     'raspbian': 'Raspbian',
     'fedoraremi': 'Fedora',
     'chapeau': 'Chapeau',
@@ -1662,6 +1663,14 @@ def os_data():
      grains['kernelrelease'], grains['kernelversion'], grains['cpuarch'], _) = platform.uname()
     # pylint: enable=unpacking-non-sequence
 
+    if salt.utils.platform.is_junos():
+        grains['kernel'] = 'junos FIXME'
+        grains['kernelrelease'] = 'junos FIXME'
+        grains['kernelversion'] = 'junos FIXME'
+        grains['osrelease'] = 'junos FIXME'
+        grains['os'] = 'junos FIXME'
+        grains['os_family'] = 'junos FIXME'
+        grains['osfullname'] = 'junos FIXME'
     if salt.utils.platform.is_proxy():
         grains['kernel'] = 'proxy'
         grains['kernelrelease'] = 'proxy'

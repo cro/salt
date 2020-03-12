@@ -38,12 +38,12 @@ def _remove_complex_types(dictionary):
 
 
 def defaults():
-    return {'os': 'junos FIXME', 'kernel': 'junos FIXME', 'osrelease': 'junos FIXME'}
+    return {'os': 'junos FIXME', 'kernel': 'junos FIXME', 'osrelease': 'junos FIXME', 'kernel':'junos FIXME'}
 
 
 def facts(proxy=None):
     if proxy is None:
-        return __utils__['junos.get_serialized_facts']()
+        return __proxy__['junos.get_serialized_facts']()
     return {'junos_facts': proxy['junos.get_serialized_facts']()}
 
 
