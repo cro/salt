@@ -90,6 +90,8 @@ if CONFIG_DIR is None:
         CONFIG_DIR = os.path.join(ROOT_DIR, 'opt', 'local', 'etc', 'salt')
     elif 'junos' in __PLATFORM:
         CONFIG_DIR = os.path.join(ROOT_DIR, 'var','local','salt','etc')
+    else:
+        CONFIG_DIR = os.path.join(ROOT_DIR, 'etc','salt')
 
 SHARE_DIR = __generated_syspaths.SHARE_DIR
 if SHARE_DIR is None:
