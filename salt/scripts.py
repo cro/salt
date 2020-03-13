@@ -594,3 +594,10 @@ def salt_unity():
         sys.argv.pop(1)
         s_fun = getattr(sys.modules[__name__], 'salt_{0}'.format(cmd))
     s_fun()
+
+
+def salt_shell():
+    from __future__ import unicode_literals
+
+    from ptpython.repl import embed
+    embed(globals(), locals(), vi_mode=False)
