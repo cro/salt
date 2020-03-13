@@ -597,7 +597,5 @@ def salt_unity():
 
 
 def salt_shell():
-    from __future__ import unicode_literals
-
     from ptpython.repl import embed
     embed(globals(), locals(), vi_mode=False)
