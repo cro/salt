@@ -2802,8 +2802,6 @@ def get_server_id():
     # Provides:
     #   server_id
 
-    if salt.utils.platform.is_proxy():
-        return {}
     id_ = __opts__.get('id', '')
     id_hash = None
     py_ver = sys.version_info[:2]
