@@ -596,6 +596,7 @@ def meminfo():
     get_version = {
         'Linux': linux_meminfo,
         'FreeBSD': freebsd_meminfo,
+        'Junos': freebsd_meminfo,
         'OpenBSD': openbsd_meminfo,
         'AIX': aix_meminfo,
     }
@@ -802,6 +803,7 @@ def cpuinfo():
     get_version = {
         'Linux': linux_cpuinfo,
         'FreeBSD': bsd_cpuinfo,
+        'Junos': bsd_cpuinfo,
         'NetBSD': bsd_cpuinfo,
         'OpenBSD': bsd_cpuinfo,
         'SunOS': sunos_cpuinfo,
@@ -933,6 +935,7 @@ def diskstats():
     get_version = {
         'Linux': linux_diskstats,
         'FreeBSD': generic_diskstats,
+        'Junos': generic_diskstats,
         'SunOS': generic_diskstats,
         'AIX': aix_diskstats,
     }
@@ -1065,6 +1068,7 @@ def vmstats():
     get_version = {
         'Linux': linux_vmstats,
         'FreeBSD': generic_vmstats,
+        'Junos': generic_vmstats,
         'OpenBSD': generic_vmstats,
         'SunOS': generic_vmstats,
         'AIX': generic_vmstats,
@@ -1115,6 +1119,7 @@ def nproc():
         'Linux': linux_nproc,
         'Darwin': generic_nproc,
         'FreeBSD': generic_nproc,
+        'Junos': generic_nproc,
         'OpenBSD': generic_nproc,
         'AIX': _aix_nproc,
     }
