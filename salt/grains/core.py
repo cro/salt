@@ -110,6 +110,22 @@ HOST_NOT_FOUND = 1
 NO_DATA = 4
 
 
+def _parse_junos_showver(txt):
+    showver = {}
+    for l in txt.splitlines():
+        if l.startswith('Model'):
+            showver['model'] = l.split(' ')[1]
+        if l.startswith('Junos'):
+            showver['osrelease'] = l.split(' ')[1]
+            showver['osmajorrelease'] = l.split('.')[0]
+            showver['osrelease_info'] = l.split('.')
+        if l.startswith('JUNOS OS Kernel'):
+            showver['kernelversion'] = l
+            relno = re.search(r'\[(.*)\]', l)
+            if relno:
+                showver['kernelrelease'] = relno.match(1)
+
+
 def _windows_cpudata():
     '''
     Return some CPU information on Windows minions
@@ -1664,14 +1680,13 @@ def os_data():
     # pylint: enable=unpacking-non-sequence
 
     if salt.utils.platform.is_junos():
-        grains['kernel'] = 'junos FIXME'
-        grains['kernelrelease'] = 'junos FIXME'
-        grains['kernelversion'] = 'junos FIXME'
-        grains['osrelease'] = 'junos FIXME'
-        grains['os'] = 'junos FIXME'
-        grains['os_family'] = 'junos FIXME'
-        grains['osfullname'] = 'junos FIXME'
-    if salt.utils.platform.is_proxy():
+        grains['kernel'] = 'Junos'
+        grains['os'] = 'Junos'
+        grains['os_family'] = 'FreeBSD'
+        showver = _parse_junos_showver(
+            subprocess.run('cli show version').stdout)
+        grains.update(showver)
+    elif salt.utils.platform.is_proxy():
         grains['kernel'] = 'proxy'
         grains['kernelrelease'] = 'proxy'
         grains['kernelversion'] = 'proxy'
