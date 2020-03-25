@@ -125,7 +125,7 @@ def _parse_junos_showver(txt):
             showver['kernelversion'] = decoded_line
             relno = re.search(r'\[(.*)\]', decoded_line)
             if relno:
-                showver['kernelrelease'] = relno.match(1)
+                showver['kernelrelease'] = relno.group(1)
 
 
 def _windows_cpudata():
