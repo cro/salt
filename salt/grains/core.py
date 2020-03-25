@@ -1436,7 +1436,7 @@ _OS_NAME_MAP = {
     'archarm': 'Arch ARM',
     'arch': 'Arch',
     'debian': 'Debian',
-    'junos': 'Junos',
+    'Junos': 'Junos',
     'raspbian': 'Raspbian',
     'fedoraremi': 'Fedora',
     'chapeau': 'Chapeau',
@@ -1683,6 +1683,7 @@ def os_data():
 
     if salt.utils.platform.is_junos():
         grains['kernel'] = 'Junos'
+        grains['osfullname'] = 'Junos'
         grains['os'] = 'Junos'
         grains['os_family'] = 'FreeBSD'
         showver = _parse_junos_showver(
