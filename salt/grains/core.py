@@ -25,6 +25,7 @@ import datetime
 import warnings
 import time
 import hashlib
+import subprocess
 
 # pylint: disable=import-error
 try:
