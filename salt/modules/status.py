@@ -432,6 +432,7 @@ def cpustats():
     get_version = {
         'Linux': linux_cpustats,
         'FreeBSD': freebsd_cpustats,
+        'Junos': freebsd_cpustats,
         'OpenBSD': openbsd_cpustats,
         'SunOS': sunos_cpustats,
         'AIX': aix_cpustats,
@@ -1248,6 +1249,7 @@ def netstats():
         'Linux': linux_netstats,
         'FreeBSD': bsd_netstats,
         'OpenBSD': bsd_netstats,
+        'Junos': bsd_netstats,
         'SunOS': sunos_netstats,
         'AIX': aix_netstats,
     }
@@ -1428,6 +1430,7 @@ def netdev():
     get_version = {
         'Linux': linux_netdev,
         'FreeBSD': freebsd_netdev,
+        'Junos': freebsd_netdev,
         'SunOS': sunos_netdev,
         'AIX': aix_netdev,
     }
@@ -1489,6 +1492,7 @@ def w():  # pylint: disable=C0103
     get_version = {
         'Darwin': bsd_w,
         'FreeBSD': bsd_w,
+        'Junos': bsd_w,
         'Linux': linux_w,
         'OpenBSD': bsd_w,
     }
@@ -1589,6 +1593,7 @@ def version():
     get_version = {
         'Linux': linux_version,
         'FreeBSD': bsd_version,
+        'Junos': bsd_version,
         'OpenBSD': bsd_version,
         'AIX': lambda: __salt__['cmd.run']('oslevel -s'),
     }
