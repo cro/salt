@@ -114,15 +114,16 @@ NO_DATA = 4
 def _parse_junos_showver(txt):
     showver = {}
     for l in txt.splitlines():
-        if l.startswith('Model'):
-            showver['model'] = l.split(' ')[1]
-        if l.startswith('Junos'):
-            showver['osrelease'] = l.split(' ')[1]
-            showver['osmajorrelease'] = l.split('.')[0]
-            showver['osrelease_info'] = l.split('.')
-        if l.startswith('JUNOS OS Kernel'):
-            showver['kernelversion'] = l
-            relno = re.search(r'\[(.*)\]', l)
+        decoded_line = l.decode('utf-8')
+        if decoded_line.startswith('Model'):
+            showver['model'] = decoded_line.split(' ')[1]
+        if decoded_line.startswith('Junos'):
+            showver['osrelease'] = decoded_line.split(' ')[1]
+            showver['osmajorrelease'] = decoded_line.split('.')[0]
+            showver['osrelease_info'] = decoded_line.split('.')
+        if decoded_line.startswith('JUNOS OS Kernel'):
+            showver['kernelversion'] = decoded_line
+            relno = re.search(r'\[(.*)\]', decoded_line)
             if relno:
                 showver['kernelrelease'] = relno.match(1)
 
