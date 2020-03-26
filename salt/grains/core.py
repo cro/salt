@@ -2827,7 +2827,8 @@ def get_server_id():
         # Python 3.3 enabled hash randomization, so we need to shell out to get
         # a reliable hash.
         try:
-            id_hash = int.from_bytes(hashlib.sha256(id_.encode()).digest())
+            # Use 'big' here because that is typical ordering for network protocols
+            id_hash = int.from_bytes(hashlib.sha256(id_.encode()).digest(), byteorder='big')
         except (TypeError, ValueError):
             log.debug(
                 'Failed to hash the ID to get the server_id grain. Result of '
