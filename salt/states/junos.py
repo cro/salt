@@ -206,7 +206,7 @@ def diff(name, d_id):
             get the diff:
               junos:
                 - diff
-                - id: 10
+                - d_id: 10
 
     Parameters:
       Optional
@@ -214,7 +214,7 @@ def diff(name, d_id):
           The rollback id value [0-49]. (default = 0)
     '''
     ret = {'name': name, 'changes': {}, 'result': True, 'comment': ''}
-    ret['changes'] = __salt__['junos.diff'](d_id)
+    ret['changes'] = __salt__['junos.diff'](id=d_id)
     return ret
 
 
