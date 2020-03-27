@@ -1687,7 +1687,7 @@ def os_data():
         grains['os'] = 'Junos'
         grains['os_family'] = 'FreeBSD'
         showver = _parse_junos_showver(
-            subprocess.run(['cli','show', 'version'], stdout=subprocess.PIPE).stdout)
+            subprocess.run(['/usr/sbin/cli','show', 'version'], stdout=subprocess.PIPE).stdout)
         grains.update(showver)
     elif salt.utils.platform.is_proxy():
         grains['kernel'] = 'proxy'
