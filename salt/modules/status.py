@@ -489,7 +489,7 @@ def meminfo():
         whichlocation = salt.utils.path.which('sysctl')
 
         if whichlocation:
-            sysctlvm = __salt__['cmd.run']('{} vm'.format(whichlocation).splitlines())
+            sysctlvm = __salt__['cmd.run']([whichlocation, 'vm'])
             sysctlvm = [x for x in sysctlvm if x.startswith('vm')]
             sysctlvm = [x.split(':') for x in sysctlvm]
             sysctlvm = [[y.strip() for y in x] for x in sysctlvm]
