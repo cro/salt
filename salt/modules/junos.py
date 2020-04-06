@@ -564,8 +564,6 @@ def diff(*args, **kwargs):
     will be used.  A warning is logged if more than one is passed.
     '''
     kwargs = salt.utils.args.clean_kwargs(**kwargs)
-    if kwargs:
-        salt.utils.args.invalid_kwargs(kwargs)
 
     ids_passed = 0
     if 'd_id' in kwargs:
@@ -581,6 +579,9 @@ def diff(*args, **kwargs):
     if ids_passed > 0:
         log.warning('junos.rollback called with more than one possible ID.')
         log.warning('Use only one of the positional argument, `id`, or `d_id` kwargs')
+
+    if kwargs:
+        salt.utils.args.invalid_kwargs(kwargs)
 
     conn = __proxy__['junos.conn']()
     ret = {}

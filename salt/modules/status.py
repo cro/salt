@@ -485,13 +485,20 @@ def meminfo():
         '''
         freebsd specific implementation of meminfo
         '''
-        sysctlvm = __salt__['cmd.run']('sysctl vm').splitlines()
-        sysctlvm = [x for x in sysctlvm if x.startswith('vm')]
-        sysctlvm = [x.split(':') for x in sysctlvm]
-        sysctlvm = [[y.strip() for y in x] for x in sysctlvm]
-        sysctlvm = [x for x in sysctlvm if x[1]]  # If x[1] not empty
-
         ret = {}
+        whichlocation = salt.utils.path.which('sysctl')
+
+        if whichlocation:
+            sysctlvm = __salt__['cmd.run']('{} vm'.format(whichlocation).splitlines())
+            sysctlvm = [x for x in sysctlvm if x.startswith('vm')]
+            sysctlvm = [x.split(':') for x in sysctlvm]
+            sysctlvm = [[y.strip() for y in x] for x in sysctlvm]
+            sysctlvm = [x for x in sysctlvm if x[1]]  # If x[1] not empty
+        else:
+            ret['message']  = 'Cannot find sysctl'
+            ret['success'] = False
+            return ret
+
         for line in sysctlvm:
             ret[line[0]] = line[1]
         # Special handling for vm.total as it's especially important
