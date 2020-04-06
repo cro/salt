@@ -169,14 +169,15 @@ def rollback(name, d_id, **kwargs):
     .. code-block:: yaml
 
             rollback the changes:
-              junos:
-                - rollback
-                - id: 5
+              junos.rollback
+                - 5
 
     Parameters:
       Optional
-        * id:
+        * d_id:
           The rollback id value [0-49]. (default = 0)
+          (this variable cannot be named `id`, it conflicts
+          with the state compiler's internal id)
         * kwargs: Keyworded arguments which can be provided like-
             * timeout:
               Set NETCONF RPC timeout. Can be used for commands which
@@ -210,8 +211,10 @@ def diff(name, d_id):
 
     Parameters:
       Optional
-        * id:
+        * d_id:
           The rollback id value [0-49]. (default = 0)
+          (this variable cannot be named `id`, it conflicts with the
+          state compiler's internal id)
     '''
     ret = {'name': name, 'changes': {}, 'result': True, 'comment': ''}
     ret['changes'] = __salt__['junos.diff'](id=d_id)

@@ -426,11 +426,13 @@ def commit(**kwargs):
 
 
 @timeoutDecorator
-def rollback(**kwargs):
+def rollback(*args, **kwargs):
     '''
     Roll back the last committed configuration changes and commit
 
     id : 0
+        The rollback ID value (0-49)
+    d_id : 0
         The rollback ID value (0-49)
 
     dev_timeout : 30
@@ -455,8 +457,30 @@ def rollback(**kwargs):
     .. code-block:: bash
 
         salt 'device_name' junos.rollback 10
+
+    NOTE: Because of historical reasons and the internals of the Salt state
+    compiler, there are three possible sources of the rollback ID--the
+    positional argument, and the `id` and `d_id` kwargs.  The precedence of
+    the arguments are `id` (positional), `id` (kwarg), `d_id` (kwarg).  In
+    other words, if all three are passed, only the positional argument
+    will be used.  A warning is logged if more than one is passed.
     '''
-    id_ = kwargs.pop('id', 0)
+    ids_passed = 0
+    id_ = 0
+    if 'd_id' in kwargs:
+        id_ = kwargs.pop('d_id')
+        ids_passed = ids_passed + 1
+    if 'id' in kwargs:
+        id_ = kwargs.pop('id', 0)
+        ids_passed = ids_passed + 1
+    if args:
+        id_ = args[0]
+        ids_passed = ids_passed + 1
+
+    if ids_passed > 0:
+        log.warning('junos.rollback called with more than one possible ID.')
+        log.warning('Use only one of the positional argument, `id`, or `d_id` kwargs')
+
 
     ret = {}
     conn = __proxy__['junos.conn']()
@@ -516,11 +540,14 @@ def rollback(**kwargs):
     return ret
 
 
-def diff(**kwargs):
+def diff(*args, **kwargs):
     '''
     Returns the difference between the candidate and the current configuration
 
     id : 0
+        The rollback ID value (0-49)
+
+    d_id : 0
         The rollback ID value (0-49)
 
     CLI Example:
@@ -528,11 +555,32 @@ def diff(**kwargs):
     .. code-block:: bash
 
         salt 'device_name' junos.diff 3
+
+    NOTE: Because of historical reasons and the internals of the Salt state
+    compiler, there are three possible sources of the rollback ID--the
+    positional argument, and the `id` and `d_id` kwargs.  The precedence of
+    the arguments are `id` (positional), `id` (kwarg), `d_id` (kwarg).  In
+    other words, if all three are passed, only the positional argument
+    will be used.  A warning is logged if more than one is passed.
     '''
     kwargs = salt.utils.args.clean_kwargs(**kwargs)
-    id_ = kwargs.pop('id', 0)
     if kwargs:
         salt.utils.args.invalid_kwargs(kwargs)
+
+    ids_passed = 0
+    if 'd_id' in kwargs:
+        id_ = kwargs.pop('d_id')
+        ids_passed = ids_passed + 1
+    if 'id' in kwargs:
+        id_ = kwargs.pop('id', 0)
+        ids_passed = ids_passed + 1
+    if args:
+        id_ = args[0]
+        ids_passed = ids_passed + 1
+
+    if ids_passed > 0:
+        log.warning('junos.rollback called with more than one possible ID.')
+        log.warning('Use only one of the positional argument, `id`, or `d_id` kwargs')
 
     conn = __proxy__['junos.conn']()
     ret = {}
