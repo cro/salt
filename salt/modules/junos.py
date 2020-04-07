@@ -1395,3 +1395,21 @@ def commit_check():
         ret['out'] = False
 
     return ret
+
+
+@timeoutDecorator
+def rpc_file_list(path, **kwargs):
+    kwargs = salt.utils.args.clean_kwargs(**kwargs)
+    conn = __proxy__['junos.conn']()
+    if dev._conn is None:
+        return False
+
+    results = conn.rpc.file_list(path=path)
+
+    ret = {}
+
+    ret['files'] = results
+
+    ret['success'] = True
+
+    return ret

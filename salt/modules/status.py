@@ -495,7 +495,7 @@ def meminfo():
             sysctlvm = [[y.strip() for y in x] for x in sysctlvm]
             sysctlvm = [x for x in sysctlvm if x[1]]  # If x[1] not empty
         else:
-            ret['message']  = 'Cannot find sysctl'
+            ret['message'] = 'Cannot find sysctl'
             ret['success'] = False
             return ret
 
