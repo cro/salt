@@ -1502,7 +1502,6 @@ def _strip_newlines(str):
 def _make_source_list(dir):
 
     dir_list = []
-    log.debug("dir passed in {}".format(dir))
     if not dir:
         return
     base = rpc_file_list(dir)['files']['directory']
@@ -1651,7 +1650,6 @@ def _find_routing_engines():
             status = None
 
     engine['success'] = True
-    log.debug(engine)
     return engine
 
 
@@ -1684,8 +1682,6 @@ def routing_engine(**kwargs):
 
     master = None
     backup = []
-    log.debug('!@#!@#!@#')
-    log.debug(engine_status)
     for k, v in engine_status.items():
         if v == 'Master':
             master = k
