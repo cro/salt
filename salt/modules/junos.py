@@ -30,6 +30,7 @@ except ImportError:
 # Import Salt libs
 import salt.utils.args
 import salt.utils.files
+import salt.utils.path
 import salt.utils.json
 import salt.utils.stringutils
 from salt.ext import six
@@ -1559,7 +1560,12 @@ def file_compare(file1, file2, **kwargs):
            'identical': False,
            'success': True}
 
-    cliret = __salt__['cmd.run']('cli file compare files '+file1+' '+file2)
+    junos_cli = salt.utils.path.which('cli')
+    if not junos_cli:
+        return {'success': False,
+                'message': 'Cannot find Junos cli command'}
+
+    cliret = __salt__['cmd.run']('{} file compare files {} {} '.format(junos_cli, file1, file2))
     clilines = cliret.splitlines()
 
     for r in clilines:
@@ -1599,7 +1605,12 @@ def fsentry_exists(dir, **kwargs):
             True
        
     '''
-    ret = __salt__['cmd.run']('cli file show '+dir)
+    junos_cli = salt.utils.path.which('cli')
+    if not junos_cli:
+        return {'success': False,
+                'message': 'Cannot find Junos cli command'}
+
+    ret = __salt__['cmd.run']('{} file show {}'.format(junos_cli, dir))
     retlines = ret.splitlines()
     exists = True
     is_dir = False
@@ -1617,7 +1628,12 @@ def fsentry_exists(dir, **kwargs):
 
 
 def _find_routing_engines():
-    re_check = __salt__['cmd.run']('cli show chassis routing-engine')
+    junos_cli = salt.utils.path.which('cli')
+    if not junos_cli:
+        return {'success': False,
+                'message': 'Cannot find Junos cli command'}
+
+    re_check = __salt__['cmd.run']('{} show chassis routing-engine'.format(junos_cli))
     engine_present = True
     engine = {}
 
@@ -1718,6 +1734,11 @@ def dir_copy(source, dest, force=False, **kwargs):
     The result will be `/var/tmp/jet/<files and dirs in /var/db/scripts/jet`.
 
     '''
+    junos_cli = salt.utils.path.which('cli')
+    if not junos_cli:
+        return {'success': False,
+                'message': 'Cannot find Junos cli command'}
+
     ret = {}
     ret_messages = ''
     if not source.startswith('/'):
@@ -1755,7 +1776,7 @@ def dir_copy(source, dest, force=False, **kwargs):
         target = dest+d
         status = fsentry_exists(target)
         if not status['exists']:
-            ret = __salt__['cmd.run']('cli file make-directory '+target)
+            ret = __salt__['cmd.run']('{} file make-directory {}'.format(junos_cli, target))
             ret = ret_messages + ret
         else:
             ret_messages = ret_messages + 'Directory '+target+' already exists.\n'
@@ -1765,7 +1786,7 @@ def dir_copy(source, dest, force=False, **kwargs):
             comp_result = file_compare(f, target)
 
             if not comp_result['identical'] or force:
-                ret = __salt__['cmd.run']('cli file copy '+f+' '+target)
+                ret = __salt__['cmd.run']('{} file copy {} {}'.format(junos_cli, f, target))
                 ret = ret_messages + ret
             else:
                 ret_messages = ret_messages + 'Files {} and {} are identical, not copying.\n'.format(f, target)
