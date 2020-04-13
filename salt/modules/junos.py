@@ -1704,9 +1704,11 @@ def routing_engine(**kwargs):
         if v == 'Backup' or v == 'Disabled':
             backup.append(k)
 
-    return {'master': master,
-            'backup': backup,
-            'success': True}
+    ret = {'master': master,
+           'backup': backup,
+           'success': True}
+    log.debug(ret)
+    return ret
 
 
 @timeoutDecorator
