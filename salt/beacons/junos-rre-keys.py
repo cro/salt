@@ -9,12 +9,12 @@
 #
 # beacon:
 #   beacons:
-#     rre-keys:
+#     junos-rre-keys:
 #       - interval: 43200
 #
 # `interval` above is in seconds, 43200 is recommended (every 12 hours)
 
-__virtualname__ = 'rre-keys'
+__virtualname__ = 'junos-rre-keys'
 
 
 def beacon(config):
